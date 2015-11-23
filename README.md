@@ -16,16 +16,22 @@ This is what this project aimed to highlight. You see, space is precious and val
 
 ###Introducing YouSave...
 
-Take a file, let's say it is a folder of music. Compress it into a zip, tar, whatever you like. Then, feed it to YouSave.
+With YouSave, you can store all of your personal files in video. Just give the program a file archive (.zip, .tar, .gz, etc.) and let us do the rest.
 
-**Here's a rundown of what happens to the file:**
+Disclaimer: at this point in time, all it can do is store it in QR codes.
 
-The file is taken, its binary (in the glorious hexadecimal form) is read (courtesy of xxd), and outputted to a large document (in the end, it's about twice the size as the original document).
+###Instructions
+Open up your favorite Terminal, and make a folder.  
+`mkdir folder`  
 
-Then, this document is split up into sections of 48 lines per section (2880 characters), and fed into qrencode, where multiple QR codes are made and saved.
+Then, place your file inside it (make sure its name is file.zip).  
+`cp file.zip folder`  
 
-At this point in the development of the project, these codes are not yet positioned into a video for upload, however that doesn't mean we can't talk about the decoding process.
+Now, launch with python (2.7.10).  
+`cd folder; python yousave.py`  
 
-Next, once the QR codes have been made (remember they haven't been fixed into a video yet), you have the option to decode them and get your file back. To do this, zbarimg scans all of the QR codes in the order you made them, and the output is printed back to another large document. Then, xxd's handy rebuild option is employed to reconstruct the binary package– your original compressed archive.
+At the launch screen, choose  
+`[1] Encode a file.`   
 
-##The end.
+Let it run, and then you're done! If you want to decode the images later, launch the same program, and choose:  
+`[2] Decode a file.`

@@ -275,17 +275,59 @@ def decodeRGB():
             index += 1
 
     filename = 1
-    print index
     for x in range(0, index / 3, 1):
         for y in range(0, 3, 1):
             os.rename(dirpath + "/decoded/" + str(x + 1) + "-" + str(y) + ".png", dirpath + "/decoded/" + str(filename) + ".png")
             filename += 1
 
-### MISC FUNCTIONS
+# Video Frame Construction
+def makeFrames():
+    print("\nStitching images together...")
+    print("(Ignore upcoming warnings)\n")
+    # make a directory to store the frames
+    if(not os.path.isdir(os.getcwd() + "/frames")):
+        print "Making directory to hold frames"
+        os.makedirs(os.getcwd() + "/frames")
 
-def progressPrintout(numerator,denominator):
-    if round((float(numerator) / (denominator / 3))*100) >= incrementProgress:
-        print str(incrementProgress) + '% (' + str(numerator) + '/' + str(denominator / 3) + ')'
+    # set up a shortcut to the /encoded directory.
+    encpath = os.getcwd() + "/encoded"
+
+    # check to make sure the encoded directory exists before doing anything else
+    if not os.path.isdir(encpath):
+        print "Directory not found. Exiting..."
+        exit()
+
+
+
+    # find the number of files in the /encoded directory.
+    numFiles = len(
+    [f for f in os.listdir(encpath)
+    if os.path.isfile(os.path.join(encpath, f))
+    and os.path.join(encpath, f).split(".")[-1] == "png"])
+
+    frameNumber = 1 # frame filename (to be incremented)
+    for file in xrange(0,numFiles,21):
+        startingFileNumber = int(file) + 1
+        endingFileNumber = int(file) + 21 # will exceed numFiles, but montage doesn't care.
+
+        # montage {1..21}.png -tile 7x3 -geometry +2+88 test2.png
+        os.system("montage -quiet encoded/{"
+        + str(startingFileNumber)
+        + ".."
+        + str(endingFileNumber)
+        + '}.png '
+        + "-tile 7x3 -geometry +2+88 frames/"
+        + str(frameNumber)
+        + ".png")
+
+        frameNumber += 1 # increment the filename for the frame image.
+
+    os.system("rm -r encoded/") # all of these are now in the frames. Dispose of them.
+
+### MISC FUNCTIONS
+def progressPrintout(numerator,denominator): # I need to actually finish this sometime soon
+    if round((float(numerator) / denominator) * 100) >= incrementProgress:
+        print str(incrementProgress) + '% (' + str(numerator) + '/' + str(denominator) + ')'
         incrementProgress += 10
 
 def showStats():
@@ -350,17 +392,18 @@ Please select what you would like to do.
         time.sleep(3)
         mainMenu()
 
-    if choice == 1:
-        encodeToQR()    #works
-        encodeRGB()     #works
+    if choice == 1: #Encode a file
+        encodeToQR()
+        encodeRGB()
         clean(choice)
+        makeFrames()
         print("\nSuccess!\n")
         time.sleep(3)
         mainMenu()
-    elif choice == 2:
-        decodeRGB() #works
-        decodeQR()  #occasionally works (thanks to zbarimg)
-        recompileBinary() #works
+    elif choice == 2: #Decode a file
+        decodeRGB()
+        decodeQR()
+        recompileBinary()
         showStats() #keeping md5's here for debugging.
         clean(choice)
         print("\nSuccess!\n")

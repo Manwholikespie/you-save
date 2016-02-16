@@ -79,6 +79,7 @@ def encodeToQR():
             os.system("printf x | qrencode -o codes/" + str(fileNumber) + ".png")
             fileNumber += 1
 
+
 def decodeQR():
     os.system("rm newFile.binary; touch newFile.binary") #to clean up any past uses
 
@@ -126,6 +127,7 @@ def cleanUp():
     rm *.binary;
     rm -r decoded/;
     """)
+
 
 def encodeRGB():
 
@@ -223,8 +225,6 @@ def encodeRGB():
     print "All images are now RGB."
 
 
-
-
 def decodeRGB():
     #Set up a shortcut to the current directory
     dirpath = os.getcwd()
@@ -297,32 +297,58 @@ def makeFrames():
         print "Directory not found. Exiting..."
         exit()
 
-
-
     # find the number of files in the /encoded directory.
     numFiles = len(
     [f for f in os.listdir(encpath)
     if os.path.isfile(os.path.join(encpath, f))
     and os.path.join(encpath, f).split(".")[-1] == "png"])
 
+    filesToMake = 21 - (numFiles % 21)
+
+    for x in xrange(numFiles,numFiles+filesToMake):
+        os.system("convert -size 543x543 xc:white encoded/" + str(x+1) + ".png")
+
     frameNumber = 1 # frame filename (to be incremented)
     for file in xrange(0,numFiles,21):
         startingFileNumber = int(file) + 1
         endingFileNumber = int(file) + 21 # will exceed numFiles, but montage doesn't care.
 
-        # montage {1..21}.png -tile 7x3 -geometry +2+88 test2.png
+        # montage encoded/{1..21}.png -tile 7x3 -geometry +2+88 frames/1.png
+        # os.system("montage -quiet encoded/{"
+        # + str(startingFileNumber)
+        # + ".."
+        # + str(endingFileNumber)
+        # + '}.png '
+        # + "-tile 7x3 -geometry +0+0 frames/" # Change to +2+88 if you want closer to 4k
+        # + str(frameNumber)
+        # + ".png")
+
         os.system("montage -quiet encoded/{"
         + str(startingFileNumber)
         + ".."
         + str(endingFileNumber)
         + '}.png '
-        + "-tile 7x3 -geometry +2+88 frames/"
+        + "-mode concatenate -tile 7x3 frames/" # Change to +2+88 if you want closer to 4k
         + str(frameNumber)
         + ".png")
 
         frameNumber += 1 # increment the filename for the frame image.
 
-    os.system("rm -r encoded/") # all of these are now in the frames. Dispose of them.
+    os.system("mogrify -format jpg frames/*.png")
+    os.system("mencoder \"mf://frames/*.jpg\" -o movie.avi -ovc lavc -lavcopts vcodec=mjpeg")
+
+
+# Video Frame Deconstruction
+def cutFrames():
+    print("\nCutting frames into individual QR codes...")
+
+    # re-make the "encoded directory"
+    if(not os.path.isdir(os.getcwd() + "/frames")):
+        print "Making directory to hold frames"
+        os.makedirs(os.getcwd() + "/frames")
+
+
+
 
 ### MISC FUNCTIONS
 def progressPrintout(numerator,denominator): # I need to actually finish this sometime soon
@@ -395,8 +421,9 @@ Please select what you would like to do.
     if choice == 1: #Encode a file
         encodeToQR()
         encodeRGB()
-        clean(choice)
-        makeFrames()
+        #clean(choice) # comment for debugging
+        makeFrames() # comment for debugging
+        # os.system("rm -r encoded/") # all of these are now in the frames. Dispose of them.
         print("\nSuccess!\n")
         time.sleep(3)
         mainMenu()

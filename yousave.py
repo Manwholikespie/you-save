@@ -6,24 +6,6 @@ import subprocess
 #setting path to manipulate files in the directory later
 path = os.getcwd()
 
-
-
-#Going to leave commented for now, just in case.
-"""
-def equalizeFile():
-    characterCount = int(subprocess.check_output("wc -c file.binary | awk '{print $1}'", shell=True))
-#    print characterCount #uncomment for Debugging
-    characterCountRange = 60 - (characterCount % (fileLineNumber - 1))
-#    print characterCountRange #uncomment for Debugging
-    for character in range(0,characterCountRange):
-        os.system('printf "x" >> file.binary')
-
-    equalNumber = (45 % fileLineNumber) + 1 #needs to be 45 lines
-    for i in range (0,equalNumber):
-        os.system('printf "\nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx">> file.binary')
-"""
-
-
 def encodeToQR():
     os.system("xxd -p file.zip > file.binary")
     os.system("perl -pi -e 'chomp if eof' file.binary") #deletes pesky line return so I can fit data across all 45 lines.
@@ -52,8 +34,6 @@ def encodeToQR():
             print str(incrementProgress) + '% (' + str(lineNumber) + '/' + str(fileLineNumber) + ')'
             incrementProgress += 10
 
-
-
         os.system(encodeCommand)
 
         #this endNumber will sometimes run over the actual line number, but sed doesn't care.
@@ -62,7 +42,6 @@ def encodeToQR():
         fileNumber += 1
 
         encodeCommand = None #free up space
-
 
     incrementProgress = None #free up space, and get ready for next progress bar.
 
